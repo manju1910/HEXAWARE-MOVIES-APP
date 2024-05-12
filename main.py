@@ -2,103 +2,91 @@ import pyodbc
 
 server_name= "DESKTOP-0EUUQEO\\SQLEXPRESS"
 database_name = "HexawareMoviesDB"
- 
- 
+
 conn_str = (
     f"Driver={{SQL Server}};"
     f"Server={server_name};"
     f"Database={database_name};"
     f"Trusted_Connection=yes;"
 )
+
 print("Welcome to the movies app")
 print(conn_str)
+
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
-cursor.execute("Select 1")
-print("Database connection is successful 🎊")
- 
+
+
 def read_movies():
-    cursor.execute("Select * from Movies")
-    for i in cursor:
-        print(i)
+    cursor.execute("SELECT * FROM Movies")
+    movies = cursor.fetchall()
+    for movie in movies:
+        print(movie)
 
 
-# create new movie
-def create_movie():
-   cursor.execute( "insert into movies values('Avatr',2012,13)")
-   conn.commit() #always give commit if you wantto undo then you can rollback
-
-
-
-
-
- #to get dta from user 
- 
-def create_movie():
-    cursor.execute( "insert into movies values(?,?,?)",("oppenheimerr",2023,14),)
-    conn.commit() 
-
-if __name__=="__main__":
-    create_movie()   
-    read_movies() 
-
-
-# Task 1
-# Get the data from the user
-# Clue: Use arguments
-def create_movie(title,year,director_id):
+def create_movie(title, year, director_id):
     cursor.execute(
-        "INSERT INTO Movies (Title, Year, DirectorId) VALUES (?, ?, ?)",(title,year,director_id)
+        "INSERT INTO Movies (Title, Year, DirectorId) VALUES (?, ?, ?)",
+        (title, year, director_id)
     )
-    conn.commit()  # Permanent storing | If no commit then no data
-if __name__=="__main__":
-    title=input("Enter the title: ")
-    year=int(input("Enter the year: "))
-    director_id=int(input("Id: ")) 
-    create_movie(title, year, director_id)
-    read_movies()
- 
-# # Task 2
-# # Delete a movie from the db by getting the id from user
+    conn.commit()  
+
 
 def delete_movie(movie_id):
+    try:
+        cursor.execute("DELETE FROM MovieActors WHERE MovieId = ?", (movie_id,))
+        cursor.execute("DELETE FROM Movies WHERE Id = ?", (movie_id,))
+        conn.commit()
+        print("Movie deleted successfully!")
+    except pyodbc.IntegrityError as e:
+        print("Error:", e)
+
+
+def update_movie(movie_id, title, year, director_id):
     cursor.execute(
-        "Delete from movies where movie_id = ?",
-        (movie_id)
+        "UPDATE Movies SET Title = ?, Year = ?, DirectorId = ? WHERE MovieId = ?",
+        (title, year, director_id, movie_id)
     )
     conn.commit()
-    print("Deleted Successfully")
-if __name__ == "__main__":
-    movie_id=int(input("enter the movie id: "))
-    delete_movie(movie_id)
-    read_movies() 
- 
-# # Task
-# # Choice
-# # 1. Create Movie
-# # 2. Delete Movie
-# if __name__=="__main__":
- 
-#     choice = int(input("""
-# Do you want to
-# 1. Create Movie
-# 2. Delete Movie
-# 3. Exit from the App
-# """))
- 
-#     if(choice == 1):
-#         title = input("Enter Movie Title: ")
-#         year = int(input("Enter movie year: "))
-#         director_id = int(input("Enter director's id: "))
-#         create_movie(title,year,director_id)
-#         read_movies()
-#     elif choice == 2:
-#         read_movies()
-#         Del_movieid = int(input("Enter the Movie Id you want to Delete: "))
-#         delete_movie(Del_movieid)
-#         read_movies
-#     elif choice == 3:
-#         print("See you again Soon")
+    print("Movie updated successfully!")
 
-cursor.close()
-conn.close()
+
+def menu():
+    print("\nMenu:")
+    print("1. Create a movie")
+    print("2. Update a movie")
+    print("3. Delete a movie")
+    print("4. Exit")
+
+
+if __name__ == "__main__":
+    while True:
+        menu()
+        choice = input("Enter your choice (1/2/3/4): ")
+
+        if choice == "1":
+            title = input("Enter the movie title: ")
+            year = input("Enter the release year: ")
+            director_id = input("Enter the director ID: ")
+            create_movie(title, year, director_id)
+            print("Movie added successfully!")
+
+        elif choice == "2":
+            read_movies()
+            movie_id_to_update = input("Enter the ID of the movie you want to update: ")
+            title = input("Enter the updated movie title: ")
+            year = input("Enter the updated release year: ")
+            director_id = input("Enter the updated director ID: ")
+            update_movie(movie_id_to_update, title, year, director_id)
+
+        elif choice == "3":
+            read_movies()
+            movie_id_to_delete = input("Enter the ID of the movie you want to delete: ")
+            delete_movie(movie_id_to_delete)
+
+        elif choice == "4":
+            print("Exiting the program. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter a valid option.")
