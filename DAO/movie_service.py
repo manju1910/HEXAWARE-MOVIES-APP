@@ -1,8 +1,7 @@
-class MovieService:
+from util.DBconn import DBConnection
 
-    def __init__(self,conn):
-        self.conn=conn
-        self.cursor=conn.cursor()
+
+class MovieService(DBConnection):
 
     def read_movies(self):
         try:
@@ -12,9 +11,7 @@ class MovieService:
                 print(i)
         except Exception as e:
             print(e)  
-        finally:
-            self.cursor.close()
-            self.conn.close()          
+                  
     # write this try except finally foro all methods
       
        
@@ -31,10 +28,7 @@ class MovieService:
             self.conn.commit()  # Permanent storing | If no commit then no data
         except Exception as e:
             print(e)  
-        finally:
-            self.cursor.close()
-            self.conn.close() 
-
+        
     def update_movie(self, movie, movie_id):
         try:    
             self.cursor.execute(
@@ -48,9 +42,7 @@ class MovieService:
             self.conn.commit()  # Permanent storing | If no commit then no data
         except Exception as e:
             print(e)  
-        finally:
-            self.cursor.close()
-            self.conn.close() 
+        
     # Task 2
     # Delete a movie from the db by getting the id from user
     def delete_movie(self, movie_id):
@@ -59,6 +51,4 @@ class MovieService:
             self.conn.commit()
         except Exception as e:
             print(e)  
-        finally:
-            self.cursor.close()
-            self.conn.close()     
+            

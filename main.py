@@ -1,20 +1,8 @@
-import pyodbc
-from Entity.movie import Movie
+from Entity import Director,Movie,Actor
+
+# from Entity.movie import Movie
 from DAO.movie_service import MovieService
-server_name= "DESKTOP-0EUUQEO\\SQLEXPRESS"
-database_name = "HexawareMoviesDB"
- 
- 
-conn_str = (
-    f"Driver={{SQL Server}};"
-    f"Server={server_name};"
-    f"Database={database_name};"
-    f"Trusted_Connection=yes;"
-)
- 
- 
-print(conn_str)
-conn = pyodbc.connect(conn_str)
+from DAO.director_service import DirectorService
 # cursor = conn.cursor()
 # cursor.execute("Select 1")
 # print("Database connection is successful 🎊")
@@ -27,9 +15,7 @@ conn = pyodbc.connect(conn_str)
 
  
  
-class DirectorService:
-    pass
- 
+
  
 class ActorService:
     pass
@@ -67,8 +53,10 @@ class ActorService:
 # D - Delete
  
 class MainMenu:
+    movie_service=MovieService()
+    director_service=DirectorService()
     def movie_menu(self):
-        movie_service = MovieService(conn)
+      
     
         while True:
             print(
@@ -87,25 +75,40 @@ class MainMenu:
                 year = int(input("Please enter movie year: "))
                 director_id = int(input("Please enter movie director's id: "))
                 new_movie = Movie(title, year, director_id)
-                movie_service.create_movie(new_movie)
+                self.movie_service.create_movie(new_movie)
             elif choice == 2:
-                movie_service.read_movies()
+                self.movie_service.read_movies()
             if choice == 3:
                 movie_id = int(input("Please enter movie's id: "))
                 title = input("Please enter movie title: ")
                 year = int(input("Please enter movie year: "))
                 director_id = int(input("Please enter movie director's id: "))
                 updated_movie = Movie(title, year, director_id)
-                movie_service.update_movie(updated_movie, movie_id)
+                self.movie_service.update_movie(updated_movie, movie_id)
             elif choice == 4:
                 movie_id = int(input("Please tell a movie id to delete: "))
-                movie_service.delete_movie(movie_id)
+                self.movie_service.delete_movie(movie_id)
             elif choice == 5:
                 break
     
     
     def director_menu(self):
-        pass
+         while True:
+            print(
+                """      
+            
+            1. View all Movies
+            2. Back to main menu
+                    """
+            )
+            choice = int(input("Please choose from above options: "))
+    
+            
+            if choice == 1:
+                self.director_service.read_director()
+            elif choice == 2:
+                break
+    
     
     
     def actor_menu(self):
@@ -135,6 +138,7 @@ if __name__ == "__main__":
         elif choice == 3:
             main_menu.actor_menu()
         elif choice == 4:
+            main_menu.movie_service.close()
             break
  
     # Clean up code
